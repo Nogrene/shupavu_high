@@ -7,26 +7,11 @@ import StudentList from './pages/StudentList';
 import StudentProfile from './pages/StudentProfile';
 import FeeManagement from './pages/FeeManagement';
 import Settings from './pages/Settings';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import Layout from './components/Layout';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" />;
-};
-
-const Layout = ({ children }) => {
-  return (
-    <div className="app-container">
-      <Sidebar />
-      <div className="main-wrapper">
-        <Header />
-        <main className="main-content">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
 };
 
 function App() {
@@ -45,5 +30,6 @@ function App() {
     </AuthProvider>
   );
 }
+
 
 export default App;

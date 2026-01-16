@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
-import { Link } from 'react-router-dom';
+import api, { FILE_BASE_URL } from '../utils/api';
+import { Link, useNavigate } from 'react-router-dom';
 import { Users, Plus, Download, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import StudentModal from '../components/StudentModal';
@@ -79,6 +79,8 @@ const StudentList = () => {
     ).filter(s => formFilter === '' || s.form === Number(formFilter))
         .filter(s => streamFilter === '' || s.stream === streamFilter);
 
+    const navigate = useNavigate();
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -144,11 +146,20 @@ const StudentList = () => {
                     </thead>
                     <tbody>
                         {filteredStudents.map((student) => (
-                            <tr key={student._id}>
+                            <tr
+                                key={student._id}
+                                onClick={() => navigate(`/students/${student._id}`)}
+                                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                            >
                                 <td>
                                     <div className="flex items-center gap-3">
                                         <div className="avatar">
-                                            {student.photo ? <img src={`http://localhost:5000${student.photo}`} alt={student.name} /> : <Users size={20} />}
+                                            {student.photo ? (
+                                                <img
+                                                    src={student.photo.startsWith('http') ? student.photo : `${FILE_BASE_URL}${student.photo}`}
+                                                    alt={student.name}
+                                                />
+                                            ) : <Users size={20} />}
                                         </div>
                                         <div className="font-semibold text-gray-800">{student.name}</div>
                                     </div>
@@ -161,11 +172,11 @@ const StudentList = () => {
                                         {student.isCleared ? 'Cleared' : 'Uncleared'}
                                     </span>
                                 </td>
-                                <td className="text-right">
+                                <td className="text-right" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center justify-end gap-2">
-                                        <Link to={`/students/${student._id}`} className="text-accent hover:text-accent-hover p-1"><Eye size={18} /></Link>
-                                        <button onClick={() => openEditModal(student)} className="text-secondary hover:text-main p-1"><Edit size={18} /></button>
-                                        {user?.role === 'Admin' && <button onClick={() => handleDelete(student._id)} className="text-error hover:text-red-700 p-1"><Trash2 size={18} /></button>}
+                                        <Link to={`/students/${student._id}`} className="text-accent hover:text-accent-hover p-1" onClick={(e) => e.stopPropagation()}><Eye size={18} /></Link>
+                                        <button onClick={(e) => { e.stopPropagation(); openEditModal(student); }} className="text-secondary hover:text-main p-1"><Edit size={18} /></button>
+                                        {user?.role === 'Admin' && <button onClick={(e) => { e.stopPropagation(); handleDelete(student._id); }} className="text-error hover:text-red-700 p-1"><Trash2 size={18} /></button>}
                                     </div>
                                 </td>
                             </tr>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { FILE_BASE_URL } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 import { CreditCard, Plus, Search, Download, Filter, Loader2, DollarSign } from 'lucide-react';
 
 const FeeManagement = () => {
@@ -8,8 +9,9 @@ const FeeManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [paymentData, setPaymentData] = useState({ amount: '', semester: 1, year: new Date().getFullYear() });
+    const [paymentData, setPaymentData] = useState({ amount: '', term: 1, year: new Date().getFullYear() });
     const [saving, setSaving] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchFees();
@@ -37,7 +39,7 @@ const FeeManagement = () => {
             });
             fetchFees();
             setIsPaymentModalOpen(false);
-            setPaymentData({ amount: '', semester: 1, year: new Date().getFullYear() });
+            setPaymentData({ amount: '', term: 1, year: new Date().getFullYear() });
         } catch (error) {
             alert('Payment failed');
         } finally {
@@ -104,12 +106,19 @@ const FeeManagement = () => {
                     </thead>
                     <tbody>
                         {filteredFees.map((fee) => (
-                            <tr key={fee._id}>
+                            <tr
+                                key={fee._id}
+                                onClick={() => navigate(`/students/${fee.student?._id}`)}
+                                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                            >
                                 <td>
                                     <div className="flex items-center gap-3">
                                         <div className="avatar">
                                             {fee.student?.photo ? (
-                                                <img src={`http://localhost:5000${fee.student.photo}`} alt={fee.student.name} />
+                                                <img
+                                                    src={fee.student.photo.startsWith('http') ? fee.student.photo : `${FILE_BASE_URL}${fee.student.photo}`}
+                                                    alt={fee.student.name}
+                                                />
                                             ) : (
                                                 <span className="text-xs font-bold">{fee.student?.name?.charAt(0)}</span>
                                             )}
@@ -123,13 +132,17 @@ const FeeManagement = () => {
                                 <td className="font-medium text-success">Ksh {fee.totalPaid.toLocaleString()}</td>
                                 <td className="font-medium text-error">Ksh {fee.balance.toLocaleString()}</td>
                                 <td>
-                                    <span className={`badge ${fee.balance <= 0 ? 'badge-success' : 'badge-danger'}`}>
-                                        {fee.balance <= 0 ? 'Cleared' : 'Pending'}
-                                    </span>
+                                    {fee.student?.isCleared ? (
+                                        <span className="badge badge-success">
+                                            Cleared — Ksh {fee.totalPaid.toLocaleString()}
+                                        </span>
+                                    ) : (
+                                        <span className="badge badge-danger">Pending</span>
+                                    )}
                                 </td>
-                                <td className="text-right">
+                                <td className="text-right" onClick={(e) => e.stopPropagation()}>
                                     <button
-                                        onClick={() => { setSelectedStudent(fee.student); setIsPaymentModalOpen(true); }}
+                                        onClick={(e) => { e.stopPropagation(); setSelectedStudent(fee.student); setIsPaymentModalOpen(true); }}
                                         className="btn btn-primary text-xs py-1 px-3 ml-auto"
                                     >
                                         <Plus size={16} /> Record Payment
@@ -149,7 +162,9 @@ const FeeManagement = () => {
                                 <h2 className="text-xl font-bold">Record Payment</h2>
                                 <p className="text-blue-100 text-sm">{selectedStudent?.name}</p>
                             </div>
-                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-white hover:text-blue-100"><Plus size={24} className="rotate-45" /></button>
+                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-white hover:text-blue-100 flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors">
+                                <Plus size={24} className="rotate-45" />
+                            </button>
                         </div>
                         <form onSubmit={handlePayment} className="p-6 space-y-4">
                             <div className="form-group">
@@ -167,15 +182,15 @@ const FeeManagement = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="form-group">
-                                    <label className="label">Semester</label>
+                                    <label className="label">Term</label>
                                     <select
                                         className="select"
-                                        value={paymentData.semester}
-                                        onChange={(e) => setPaymentData({ ...paymentData, semester: Number(e.target.value) })}
+                                        value={paymentData.term}
+                                        onChange={(e) => setPaymentData({ ...paymentData, term: Number(e.target.value) })}
                                     >
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
-                                        <option value="3">Semester 3</option>
+                                        <option value="1">Term 1</option>
+                                        <option value="2">Term 2</option>
+                                        <option value="3">Term 3</option>
                                     </select>
                                 </div>
                                 <div className="form-group">

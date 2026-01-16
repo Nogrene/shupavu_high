@@ -72,7 +72,13 @@ const LoginPage = () => {
                         </button>
                     </form>
                     <div className="mt-8 text-center text-sm text-secondary">
-                        Contact Admin for account registration
+                        Contact Dave for account registration
+                    </div>
+
+                    <div className="mt-10 pt-8 border-t border-gray-100 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                        <p className="text-[14px] uppercase tracking-[0.4em] font-black text-blue-600 bg-blue-50 py-4 px-8 rounded-3xl border-2 border-blue-100 inline-block shadow-lg hover:scale-105 transition-transform cursor-default">
+                            A creation of <span className="text-gray-900">Nogrene</span>
+                        </p>
                     </div>
                 </div>
             </div>

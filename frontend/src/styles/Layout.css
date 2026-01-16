@@ -155,3 +155,41 @@
         padding: 1rem;
     }
 }
+
+@media (min-width: 769px) {
+    .md\:hidden {
+        display: none;
+    }
+
+    .hidden.md\:block {
+        display: block;
+    }
+}
+
+.md\:hidden {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 45;
+    /* Below sidebar (50) but above everything else */
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

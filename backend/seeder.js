@@ -19,10 +19,11 @@ const seedData = async () => {
 
         // Create Admin
         const admin = await User.create({
-            name: 'School Admin',
+            name: 'DAVE',
             email: 'admin@shupavu.ac.ke',
             password: 'admin123',
             role: 'Admin',
+            photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DAVE'
         });
 
         // Create Teacher
@@ -36,28 +37,49 @@ const seedData = async () => {
         // Create Initial Settings
         const settings = await Setting.create({
             streams: ['N', 'E', 'S', 'W'],
-            totalFeePerSemester: 15000,
+            totalFeePerTerm: 15000,
         });
 
-        // Create some students
-        const students = [
-            { admissionNumber: 'S001', name: 'John Doe', form: 1, stream: 'N' },
-            { admissionNumber: 'S002', name: 'Mary Smith', form: 2, stream: 'E' },
-            { admissionNumber: 'S003', name: 'Peter Pan', form: 1, stream: 'W' },
-        ];
+        // Generate Students
+        const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Laura', 'Robert', 'Emily', 'James', 'Jessica', 'William', 'Elizabeth', 'Joseph', 'Mary', 'Charles', 'Patricia', 'Daniel', 'Jennifer', 'Matthew', 'Linda'];
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];
 
-        for (const s of students) {
-            const createdStudent = await Student.create(s);
+        let studentCount = 1;
+        const streams = ['N', 'E', 'S', 'W'];
+        const forms = [1, 2, 3, 4];
 
-            // Initialize Fee Record
-            await FeeRecord.create({
-                student: createdStudent._id,
-                payments: [],
-                totalPaid: 0,
-                balance: settings.totalFeePerSemester * 3,
-            });
+        console.log('Generating students...');
+
+        for (const form of forms) {
+            for (const stream of streams) {
+                console.log(`Seeding Form ${form} ${stream}...`);
+                for (let i = 0; i < 20; i++) {
+                    const admissionNumber = `S${String(studentCount).padStart(4, '0')}`;
+                    const name = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+
+                    const student = await Student.create({
+                        admissionNumber,
+                        name,
+                        form,
+                        stream,
+                        photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admissionNumber}`,
+                        isCleared: Math.random() > 0.3 // Randomly set some as not cleared
+                    });
+
+                    // Initialize Fee Record
+                    await FeeRecord.create({
+                        student: student._id,
+                        payments: [],
+                        totalPaid: 0,
+                        balance: settings.totalFeePerTerm * 3, // Assuming 3 terms
+                    });
+
+                    studentCount++;
+                }
+            }
         }
 
+        console.log(`Total students seeded: ${studentCount - 1}`);
         console.log('Data Seeded Successfully!');
         process.exit();
     } catch (error) {

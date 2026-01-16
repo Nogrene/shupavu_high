@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import api from '../utils/api';
-import { Save, Plus, X, Settings as SettingsIcon } from 'lucide-react';
+import api, { FILE_BASE_URL } from '../utils/api';
+import { Save, Plus, X, Settings as SettingsIcon, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Settings = () => {
     const { user } = useAuth();
-    const [settings, setSettings] = useState({ streams: [], totalFeePerSemester: 0 });
+    const [settings, setSettings] = useState({ streams: [], totalFeePerTerm: 0 });
     const [newStream, setNewStream] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -57,17 +57,61 @@ const Settings = () => {
             </div>
 
             <div className="card space-y-6">
-                <div className="form-group">
-                    <label className="label">Total School Fee per Semester (Ksh)</label>
-                    <input
-                        type="number"
-                        className="input"
-                        value={settings.totalFeePerSemester}
-                        onChange={(e) => setSettings({ ...settings, totalFeePerSemester: Number(e.target.value) })}
-                        disabled={user?.role !== 'Admin'}
-                    />
-                    <p className="text-xs text-secondary mt-1">Total annual fee will be auto-calculated (3 x Semester Fee)</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-group">
+                        <label className="label text-main font-bold">Fee per Term (Ksh)</label>
+                        <input
+                            type="number"
+                            className="input focus:ring-2 focus:ring-accent/20"
+                            value={settings.totalFeePerTerm}
+                            onChange={(e) => {
+                                const termFee = Number(e.target.value);
+                                setSettings({ ...settings, totalFeePerTerm: termFee });
+                            }}
+                            disabled={user?.role !== 'Admin'}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="label text-main font-bold">Annual Fee (Ksh)</label>
+                        <input
+                            type="number"
+                            className="input focus:ring-2 focus:ring-accent/20"
+                            value={settings.totalFeePerTerm * 3}
+                            onChange={(e) => {
+                                const annualFee = Number(e.target.value);
+                                setSettings({ ...settings, totalFeePerTerm: Math.round(annualFee / 3) });
+                            }}
+                            disabled={user?.role !== 'Admin'}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="label text-main font-bold">Current Term</label>
+                        <select
+                            className="select w-full"
+                            value={settings.currentTerm || 1}
+                            onChange={(e) => setSettings({ ...settings, currentTerm: Number(e.target.value) })}
+                            disabled={user?.role !== 'Admin'}
+                        >
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label className="label text-main font-bold">Current Year</label>
+                        <input
+                            type="number"
+                            className="input focus:ring-2 focus:ring-accent/20"
+                            value={settings.currentYear || new Date().getFullYear()}
+                            onChange={(e) => setSettings({ ...settings, currentYear: Number(e.target.value) })}
+                            disabled={user?.role !== 'Admin'}
+                        />
+                    </div>
                 </div>
+                <p className="text-xs text-secondary mt-1 flex items-center gap-1">
+                    <AlertCircle size={14} className="text-accent" />
+                    Changing one value automatically updates the other based on a 3-term year.
+                </p>
 
                 <div>
                     <label className="label">Managed Streams</label>
@@ -115,4 +159,73 @@ const Settings = () => {
     );
 };
 
-export default Settings;
+const ProfileSection = ({ user }) => {
+    const { login } = useAuth();
+    const [name, setName] = useState(user?.name || '');
+    const [email, setEmail] = useState(user?.email || '');
+    const [photo, setPhoto] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const data = new FormData();
+        data.append('name', name);
+        data.append('email', email);
+        if (photo) data.append('photo', photo);
+
+        try {
+            const res = await api.put('/auth/profile', data);
+            localStorage.setItem('userInfo', JSON.stringify(res.data));
+            window.location.reload(); // Refresh to update user context
+        } catch (error) {
+            alert('Failed to update profile');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="card space-y-6">
+            <h3 className="text-lg font-bold border-b pb-4">Admin Profile</h3>
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="flex items-center gap-6 mb-4">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-accent/20 bg-gray-100 flex items-center justify-center">
+                        {user?.photo ? (
+                            <img src={user.photo.startsWith('http') ? user.photo : `${FILE_BASE_URL}${user.photo}`} className="w-full h-full object-cover" alt="" />
+                        ) : <span className="text-4xl font-bold text-gray-300">{user?.name?.charAt(0)}</span>}
+                    </div>
+                    <div className="flex-1">
+                        <label className="label">Update Profile Picture</label>
+                        <input type="file" onChange={(e) => setPhoto(e.target.files[0])} className="input text-xs" accept="image/*" />
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="form-group">
+                        <label className="label">Display Name</label>
+                        <input type="text" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                        <label className="label">Email Address</label>
+                        <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                </div>
+                <button type="submit" disabled={loading} className="btn btn-secondary w-full">
+                    {loading ? 'Updating...' : 'Update Admin Profile'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const SettingsWithProfile = () => {
+    const { user } = useAuth();
+    return (
+        <div className="space-y-6">
+            <Settings />
+            {user?.role === 'Admin' && <ProfileSection user={user} />}
+        </div>
+    );
+};
+
+export default SettingsWithProfile;

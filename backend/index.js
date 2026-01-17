@@ -15,7 +15,7 @@ const allowedOrigins = [
     'http://localhost:5174',
     'http://localhost:3000',
     process.env.FRONTEND_URL,
-    'https://shupavu-high.onrender.com'
+    'https://shupavu.netlify.app'
 ].filter(Boolean);
 
 app.use(cors({

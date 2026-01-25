@@ -13,18 +13,27 @@ const generateToken = (id) => {
 // @access  Public
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    console.log(`Login attempt for email: ${email}`);
 
-    if (user && (await user.matchPassword(password))) {
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            token: generateToken(user._id),
-        });
-    } else {
-        res.status(401).json({ message: 'Invalid email or password' });
+    try {
+        const user = await User.findOne({ email });
+
+        if (user && (await user.matchPassword(password))) {
+            console.log(`Successful login for: ${email}`);
+            res.json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                token: generateToken(user._id),
+            });
+        } else {
+            console.warn(`Failed login attempt for: ${email} - Invalid credentials`);
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
+    } catch (error) {
+        console.error(`Login error for ${email}:`, error);
+        res.status(500).json({ message: 'Server error during login' });
     }
 });
 

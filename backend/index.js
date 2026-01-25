@@ -16,16 +16,19 @@ const allowedOrigins = [
     'http://localhost:3000',
     process.env.FRONTEND_URL,
     'https://shupavu.netlify.app'
-].filter(Boolean);
+].filter(Boolean).map(origin => origin.replace(/\/$/, ""));
 
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        const normalizedOrigin = origin.replace(/\/$/, "");
+
+        if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
             callback(null, true);
         } else {
+            console.error(`CORS Error: Origin ${origin} (Normalized: ${normalizedOrigin}) not allowed. Allowed origins:`, allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },

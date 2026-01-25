@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_API_URL || 'https://shupavu-high.onrender.com/api';
+let baseUrl = import.meta.env.VITE_API_URL || 'https://shupavu-high.onrender.com/api';
+
+// Ensure baseUrl is string and remove trailing slash from the base (not the /api part if it exists)
+if (baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.slice(0, -1);
+}
 
 const api = axios.create({
     baseURL: baseUrl,

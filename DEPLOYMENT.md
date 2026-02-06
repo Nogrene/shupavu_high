@@ -32,7 +32,8 @@ This guide explains how to deploy the Shupavu High SMS application with the fron
 
 3. **Environment Variables**
    - Go to Site settings → Environment variables
-   - Add: `VITE_API_URL` = `https://shupavu-high.onrender.com/api`
+   - Add: `VITE_API_URL` = `https://shupavu-high.onrender.com`  
+     (the frontend will auto-append `/api` if it???s missing)
 
 4. **Deploy**
    - Click "Deploy site"
@@ -84,6 +85,7 @@ This ensures page reloads work correctly with React Router.
 The backend is configured to accept requests from:
 - Local development: `http://localhost:5173`, `http://localhost:5174`, `http://localhost:3000`
 - Production: `https://shupavu.netlify.app`
+- Netlify previews: `https://*.netlify.app`
 - Custom: `process.env.FRONTEND_URL`
 
 ## Post-Deployment Steps

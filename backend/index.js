@@ -25,7 +25,16 @@ app.use(cors({
 
         const normalizedOrigin = origin.replace(/\/$/, "");
 
-        if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
+        const isNetlifyPreview = (() => {
+            try {
+                const { hostname } = new URL(normalizedOrigin);
+                return hostname === 'shupavu.netlify.app' || hostname.endsWith('.netlify.app');
+            } catch (e) {
+                return false;
+            }
+        })();
+
+        if (allowedOrigins.indexOf(normalizedOrigin) !== -1 || isNetlifyPreview) {
             callback(null, true);
         } else {
             console.error(`CORS Error: Origin ${origin} (Normalized: ${normalizedOrigin}) not allowed. Allowed origins:`, allowedOrigins);

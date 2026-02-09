@@ -63,7 +63,7 @@ const seedData = async () => {
                         form,
                         stream,
                         photo: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admissionNumber}`,
-                        isCleared: Math.random() > 0.3 // Randomly set some as not cleared
+                        isCleared: false
                     });
 
                     // Initialize Fee Record

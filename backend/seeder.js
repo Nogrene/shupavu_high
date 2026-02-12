@@ -21,7 +21,7 @@ const seedData = async () => {
         const admin = await User.create({
             name: 'DAVE',
             email: 'admin@shupavu.ac.ke',
-            password: 'admin123',
+            password: 'adminniDavy123',
             role: 'Admin',
             photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DAVE'
         });
